@@ -115,3 +115,28 @@ Some tests for prop expressions:
   let _ = element () ~children:[] ~prop:!?ref [@JSX]
   MERLIN
   let _ = element () ~children:[] ~prop:!?ref [@JSX]
+
+We have a lexer hack to parse [<element and [<Element as JSX:
+  $ echo 'let _ = [<element />]' | ./mlx
+  BATCH
+  let _ = [ (element () ~children:[] [@JSX]) ]
+  MERLIN
+  let _ = [ (element () ~children:[] [@JSX]) ]
+
+  $ echo 'let _ = [<M.element />]' | ./mlx
+  BATCH
+  let _ = [ (M.element () ~children:[] [@JSX]) ]
+  MERLIN
+  let _ = [ (M.element () ~children:[] [@JSX]) ]
+
+  $ echo 'let _ = [<element> 1 </element>]' | ./mlx
+  BATCH
+  let _ = [ (element () ~children:[ 1 ] [@JSX]) ]
+  MERLIN
+  let _ = [ (element () ~children:[ 1 ] [@JSX]) ]
+
+  $ echo 'let _ = [<M.element> 1 </M.element>]' | ./mlx
+  BATCH
+  let _ = [ (M.element () ~children:[ 1 ] [@JSX]) ]
+  MERLIN
+  let _ = [ (M.element () ~children:[ 1 ] [@JSX]) ]
