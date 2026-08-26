@@ -535,16 +535,16 @@ rule token = parse
       }
   | lowercase identchar * as name
       { find_keyword lexbuf name }
-  | "<" (lowercase identchar * as name)
-      { JSX_LIDENT name }
-  | "<" "/" (lowercase identchar * as name)
-      { JSX_LIDENT_E name }
+  | "<" (ident_ext as raw_name)
+      { let name = ident_for_extended lexbuf raw_name in
+        if Utf8_lexeme.is_capitalized name then JSX_UIDENT name
+        else JSX_LIDENT name }
+  | "<" "/" (ident_ext as raw_name)
+      { let name = ident_for_extended lexbuf raw_name in
+        if Utf8_lexeme.is_capitalized name then JSX_UIDENT_E name
+        else JSX_LIDENT_E name }
   | uppercase identchar * as name
       { UIDENT name } (* No capitalized keywords *)
-  | "<" (uppercase identchar * as name)
-      { JSX_UIDENT name }
-  | "<" "/" (uppercase identchar * as name)
-      { JSX_UIDENT_E name }
   | (raw_ident_escape? as escape) (ident_ext as raw_name)
       { let name = ident_for_extended lexbuf raw_name in
         if Utf8_lexeme.is_capitalized name then begin

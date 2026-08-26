@@ -622,17 +622,17 @@ rule token state = parse
       { return (LIDENT name) } *)
   | lowercase identchar * as name
     { (find_keyword state lexbuf ~name ~default:(LIDENT name)) }
-  | "<" (lowercase identchar * as name)
-      { return (JSX_LIDENT name) }
-  | "<" "/" (lowercase identchar * as name)
-      { return (JSX_LIDENT_E name) }
+  | "<" (ident_ext as raw_name)
+      { let* name = ident_for_extended lexbuf raw_name in
+        if Utf8_lexeme.is_capitalized name then return (JSX_UIDENT name)
+        else return (JSX_LIDENT name) }
+  | "<" "/" (ident_ext as raw_name)
+      { let* name = ident_for_extended lexbuf raw_name in
+        if Utf8_lexeme.is_capitalized name then return (JSX_UIDENT_E name)
+        else return (JSX_LIDENT_E name) }
   | uppercase identchar * as name
     { (* Capitalized keywords for OUnit *)
       (find_keyword state lexbuf ~name ~default:(UIDENT name))}
-  | "<" (uppercase identchar * as name)
-      { return (JSX_UIDENT name) }
-  | "<" "/" (uppercase identchar * as name)
-      { return (JSX_UIDENT_E name) }
   | (raw_ident_escape? as escape) (ident_ext as raw_name)
     { let* name = ident_for_extended lexbuf raw_name in
       if Utf8_lexeme.is_capitalized name then begin

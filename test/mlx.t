@@ -71,6 +71,31 @@
   MERLIN
   let _ = Hello.Ok.createElement () ~children:[ world ] [@JSX]
 
+UTF-8 is accepted in source text:
+
+  $ printf '%s\n' '(** Text — arrow → emoji 🌟 and Japanese 東京. *)' 'let message = "“Quoted” text isn’t ASCII"' | ./mlx
+  BATCH
+  let message = "\226\128\156Quoted\226\128\157 text isn\226\128\153t ASCII"
+  [@@ocaml.doc
+    " Text \226\128\148 arrow \226\134\146 emoji \240\159\140\159 and Japanese \
+     \230\157\177\228\186\172. "]
+  MERLIN
+  let message = "\226\128\156Quoted\226\128\157 text isn\226\128\153t ASCII"
+
+UTF-8 identifiers are accepted in JSX:
+
+  $ echo 'let _ = <élément été=1><Élément /></élément>' | ./mlx
+  BATCH
+  let _ =
+    élément ()
+      ~children:[ (Élément.createElement () ~children:[] [@JSX]) ]
+      ~été:1 [@JSX]
+  MERLIN
+  let _ =
+    élément ()
+      ~children:[ (Élément.createElement () ~children:[] [@JSX]) ]
+      ~été:1 [@JSX]
+
 Expected error (tag mismatch):
 
   $ echo 'let _ = <one>world</two>' | ./mlx
