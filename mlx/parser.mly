@@ -2753,6 +2753,11 @@ jsx_prop_name:
     name=LIDENT { name }
   | name=LIDENT tail=reversed_jsx_name_tail(jsx_name_sep)
       { Jsx_helper.jsx_name ~raise ((`Word name, $loc(name)) :: List.rev tail) }
+  | prefix=INFIXOP1 part=jsx_name_part
+      { Jsx_helper.jsx_name ~raise [ `Prefix prefix, $loc(prefix); part, $loc(part) ] }
+  | prefix=INFIXOP1 part=jsx_name_part tail=reversed_jsx_name_tail(jsx_name_sep)
+      { Jsx_helper.jsx_name ~raise
+          ((`Prefix prefix, $loc(prefix)) :: (part, $loc(part)) :: List.rev tail) }
 ;
 reversed_jsx_name_tail(sep):
     sep=sep part=jsx_name_part

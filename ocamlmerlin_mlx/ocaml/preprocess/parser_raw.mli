@@ -397,11 +397,15 @@ module MenhirInterpreter : sig
     | N_reversed_labeled_tuple_pattern_pattern_no_exn_ : (Asttypes.closed_flag * (string option * Parsetree.pattern) list) nonterminal
     | N_reversed_labeled_tuple_pattern_pattern_ : (Asttypes.closed_flag * (string option * Parsetree.pattern) list) nonterminal
     | N_reversed_labeled_tuple_body : ((string option * Parsetree.expression) list) nonterminal
-    | N_reversed_jsx_name_tail_jsx_tag_sep_ : (([ `Int of string * char option | `Op of string | `Word of string ] *
-   (Lexing.position * Lexing.position))
+    | N_reversed_jsx_name_tail_jsx_tag_sep_ : (([ `Int of string * char option
+   | `Op of string
+   | `Prefix of string
+   | `Word of string ] * (Lexing.position * Lexing.position))
   list) nonterminal
-    | N_reversed_jsx_name_tail_jsx_name_sep_ : (([ `Int of string * char option | `Op of string | `Word of string ] *
-   (Lexing.position * Lexing.position))
+    | N_reversed_jsx_name_tail_jsx_name_sep_ : (([ `Int of string * char option
+   | `Op of string
+   | `Prefix of string
+   | `Word of string ] * (Lexing.position * Lexing.position))
   list) nonterminal
     | N_reversed_bar_llist_extension_constructor_declaration_ : (Parsetree.extension_constructor list) nonterminal
     | N_reversed_bar_llist_extension_constructor_ : (Parsetree.extension_constructor list) nonterminal
@@ -521,7 +525,10 @@ module MenhirInterpreter : sig
   | `Prop_opt_punned of string
   | `Prop_punned of string ]) nonterminal
     | N_jsx_name_sep : (string) nonterminal
-    | N_jsx_name_part : ([ `Int of string * char option | `Op of string | `Word of string ]) nonterminal
+    | N_jsx_name_part : ([ `Int of string * char option
+  | `Op of string
+  | `Prefix of string
+  | `Word of string ]) nonterminal
     | N_jsx_longident_JSX_UIDENT_E_JSX_LIDENT_E_ : ([> `Module | `Value ] * (Lexing.position * Lexing.position) * Longident.t) nonterminal
     | N_jsx_longident_JSX_UIDENT_JSX_LIDENT_ : ([ `Module | `Value ] * (Lexing.position * Lexing.position) * Longident.t) nonterminal
     | N_jsx_fragment : (Parsetree.expression) nonterminal

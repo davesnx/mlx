@@ -1103,3 +1103,73 @@ A tag name takes no other separator:
   File "*stdin*", line 1, characters 13-15
   Error: Syntax error
   
+
+A prop name can start with an at sign:
+
+  $ echo 'let _ = <div @click=f />' | ./mlx
+  BATCH
+  let _ = div () ~children:[] ~_click:(f [@mlx.name "@click"]) [@JSX]
+  MERLIN
+  let _ = div () ~children:[] ~_click:(f [@mlx.name "@click"]) [@JSX]
+  $ echo 'let _ = <div a=x @click=f />' | ./mlx
+  BATCH
+  let _ = div () ~children:[] ~a:x ~_click:(f [@mlx.name "@click"]) [@JSX]
+  MERLIN
+  let _ = div () ~children:[] ~a:x ~_click:(f [@mlx.name "@click"]) [@JSX]
+  $ echo 'let _ = <div a @click=f />' | ./mlx
+  BATCH
+  let _ = div () ~children:[] ~a ~_click:(f [@mlx.name "@click"]) [@JSX]
+  MERLIN
+  let _ = div () ~children:[] ~a ~_click:(f [@mlx.name "@click"]) [@JSX]
+  $ echo 'let _ = <div @keyup.enter=g />' | ./mlx
+  BATCH
+  let _ = div () ~children:[] ~_keyup_enter:(g [@mlx.name "@keyup.enter"]) [@JSX]
+  MERLIN
+  let _ = div () ~children:[] ~_keyup_enter:(g [@mlx.name "@keyup.enter"]) [@JSX]
+  $ echo 'let _ = <Foo @click=f />' | ./mlx
+  BATCH
+  let _ =
+    Foo.createElement () ~children:[] ~_click:(f [@mlx.name "@click"]) [@JSX]
+  MERLIN
+  let _ =
+    Foo.createElement () ~children:[] ~_click:(f [@mlx.name "@click"]) [@JSX]
+
+A name with an at sign needs a value, the at sign must touch the name, and only one at sign is a prefix:
+
+  $ echo 'let _ = <div @click />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 13-19:
+  Error: The prop @click has no value.
+  Write @click=... instead.
+  
+  MERLIN
+  File "*stdin*", line 1, characters 13-19
+  Error: The prop @click has no value. Write @click=... instead.
+  
+  $ echo 'let _ = <div @ click=f />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 15-20:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 15-20
+  Error: Syntax error
+  
+  $ echo 'let _ = <div @@click=f />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 13-15:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 13-15
+  Error: Syntax error
+  
+  $ echo 'let _ = <div ^click=f />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 13-14:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 13-14
+  Error: Syntax error
+  

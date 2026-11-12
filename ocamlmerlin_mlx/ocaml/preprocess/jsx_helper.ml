@@ -37,10 +37,10 @@ let jsx_name ~raise segments =
   let syntax_error loc = raise Syntaxerr.(Error (Other (make_loc loc))) in
   let text (segment, loc) =
     match segment with
-    | `Word s | `Int (s, None) -> s
+    | `Word s | `Int (s, None) | `Prefix ("@" as s) -> s
     | `Op (("mod" | "land" | "lor" | "lxor" | "lsl" | "lsr" | "asr") as s) ->
         s
-    | `Op s | `Int (s, Some _) ->
+    | `Op s | `Int (s, Some _) | `Prefix s ->
         syntax_error loc;
         s
   in
@@ -54,7 +54,7 @@ let jsx_name ~raise segments =
   String.concat "" (List.map text segments)
 
 let jsx_label name =
-  String.map (function '-' | ':' | '.' -> '_' | c -> c) name
+  String.map (function '-' | ':' | '.' | '@' -> '_' | c -> c) name
 
 let with_jsx_name ~loc name expr =
   let loc = make_loc loc in
