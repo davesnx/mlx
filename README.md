@@ -37,6 +37,38 @@ It is expected to use `mlx-pp` preprocessor with either a runtime lib which
 provides the implementation of such functions or a ppx which which further
 transforms `[@JSX]` attributes into the desired output.
 
+## HTML names
+
+A prop name can have more segments, joined by `-`, `:`, `.` or `::`, and can
+start with `@`. A lowercase tag name can have more segments joined by `:`.
+
+```ocaml
+let _ = <div data-foo="a" x-on:click.prevent=f @click=g />
+let _ = <x:html />
+```
+
+Such a name is not an OCaml identifier, so mlx replaces each of these
+characters with `_` and keeps the exact name in an `[@mlx.name]` attribute:
+
+```ocaml
+let _ =
+  div () ~children:[]
+    ~data_foo:("a" [@mlx.name "data-foo"])
+    ~x_on_click_prevent:(f [@mlx.name "x-on:click.prevent"])
+    ~_click:(g [@mlx.name "@click"]) [@JSX]
+let _ = (x_html [@mlx.name "x:html"]) () ~children:[] [@JSX]
+```
+
+A function receives the prop under the label, for example `~data_foo`. A ppx
+can read the attribute to get the exact name.
+
+Limits:
+
+- The segments of a name must touch: `data - foo` is an error.
+- Such a prop needs a value: `<div data-foo />` is an error.
+- A name cannot start with a keyword or with `:`, so `class=` and `:class=`
+  are errors. A keyword is valid after the first segment, as in `x-if`.
+
 ## Installation & Usage
 
 Use the following commands to install the necessary packages:

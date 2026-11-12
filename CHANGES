@@ -1,4 +1,12 @@
 # Unreleased
+- Add HTML names. A prop name can have segments joined by `-`, `:`, `.` or
+  `::` and can start with `@`, for example `data-foo`, `x-on:click.prevent`
+  and `@click`. A lowercase tag name can have segments joined by `:`, for
+  example `<x:html>`. The label or tag replaces these characters with `_`, and
+  an `[@mlx.name]` attribute keeps the exact name:
+  `<div data-foo="a" />` lowers to
+  `div () ~children:[] ~data_foo:("a" [@mlx.name "data-foo"]) [@JSX]`.
+  [#4](https://github.com/ocaml-mlx/mlx/issues/4)
 - Breaking: an element that sets the `children` prop and also has nested
   children is now a syntax error, for example `<Foo children>a</Foo>` and
   `<Foo children=x>...xs</Foo>`. Before, mlx dropped the nested children
