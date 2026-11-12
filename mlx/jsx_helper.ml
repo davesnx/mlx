@@ -32,6 +32,29 @@ let rec equal_longindent a b =
   | Lapply _, _ | _, Lapply _ -> assert false
   | _ -> false
 
+let jsx_name ~raise segments =
+  let syntax_error loc = raise Syntaxerr.(Error (Other (make_loc loc))) in
+  let text (segment, loc) =
+    match segment with
+    | `Word s | `Int (s, None) -> s
+    | `Op (("mod" | "land" | "lor" | "lxor" | "lsl" | "lsr" | "asr") as s) ->
+        s
+    | `Op s | `Int (s, Some _) ->
+        syntax_error loc;
+        s
+  in
+  let rec check_adjacent = function
+    | (_, (_, end_)) :: ((_, ((start, _) as loc)) :: _ as rest) ->
+        if end_.Lexing.pos_cnum <> start.Lexing.pos_cnum then syntax_error loc
+        else check_adjacent rest
+    | _ -> ()
+  in
+  check_adjacent segments;
+  String.concat "" (List.map text segments)
+
+let jsx_label name =
+  String.map (function '-' | ':' | '.' -> '_' | c -> c) name
+
 let make_jsx_element ~raise ~loc:_ ~tag ~end_tag ~props ~children
     ~nested_children () =
   let () =
@@ -105,12 +128,42 @@ let make_jsx_element ~raise ~loc:_ ~tag ~end_tag ~props ~children
       let id = Location.mkloc (Lident name) (make_loc loc) in
       mkexp ~loc (Pexp_ident id)
     in
+    let punned ~loc name =
+      let label = jsx_label name in
+      if not (String.equal label name) then
+        raise
+          (Location.Error
+             (Location.errorf ~loc:(make_loc loc)
+                "The prop %a has no value.@ Write %a instead."
+                Misc.Style.inline_code name Misc.Style.inline_code
+                (name ^ "=...")));
+      label, prop_exp ~loc label
+    in
+    let valued ~loc name expr =
+      let label = jsx_label name in
+      if String.equal label name then label, expr
+      else
+        let loc = make_loc loc in
+        let payload =
+          PStr [ Str.eval ~loc (Exp.constant ~loc (Const.string ~loc name)) ]
+        in
+        let attr = Attr.mk ~loc { txt = "mlx.name"; loc } payload in
+        label, { expr with pexp_attributes = expr.pexp_attributes @ [ attr ] }
+    in
     List.map
       (function
-        | loc, `Prop_punned name -> Labelled name, prop_exp ~loc name
-        | loc, `Prop_opt_punned name -> Optional name, prop_exp ~loc name
-        | _loc, `Prop (name, expr) -> Labelled name, expr
-        | _loc, `Prop_opt (name, expr) -> Optional name, expr)
+        | loc, `Prop_punned name ->
+            let label, expr = punned ~loc name in
+            Labelled label, expr
+        | loc, `Prop_opt_punned name ->
+            let label, expr = punned ~loc name in
+            Optional label, expr
+        | loc, `Prop (name, expr) ->
+            let label, expr = valued ~loc name expr in
+            Labelled label, expr
+        | loc, `Prop_opt (name, expr) ->
+            let label, expr = valued ~loc name expr in
+            Optional label, expr)
       props
   in
   let unit =

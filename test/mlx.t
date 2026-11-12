@@ -899,3 +899,137 @@ normal operator too, even though it also closes a fragment:
   let ( <> ) a b = a
   MERLIN
   let ( <> ) a b = a
+
+Prop names can have more segments, joined by `-`, `:`, `.` or `::`. The label
+is the name with those characters replaced by `_`, and the value carries the
+exact name in an `[@mlx.name]` attribute:
+
+  $ echo 'let _ = <div data-foo="a" aria-label="b" x:html=c on:click=f />' | ./mlx
+  BATCH
+  let _ =
+    div () ~children:[] ~data_foo:("a" [@mlx.name "data-foo"])
+      ~aria_label:("b" [@mlx.name "aria-label"]) ~x_html:(c [@mlx.name "x:html"])
+      ~on_click:(f [@mlx.name "on:click"]) [@JSX]
+  MERLIN
+  let _ =
+    div () ~children:[] ~data_foo:("a" [@mlx.name "data-foo"])
+      ~aria_label:("b" [@mlx.name "aria-label"]) ~x_html:(c [@mlx.name "x:html"])
+      ~on_click:(f [@mlx.name "on:click"]) [@JSX]
+  $ echo 'let _ = <div x-if=c data-type="x" data-mod=m data-2=n />' | ./mlx
+  BATCH
+  let _ =
+    div () ~children:[] ~x_if:(c [@mlx.name "x-if"])
+      ~data_type:("x" [@mlx.name "data-type"])
+      ~data_mod:(m [@mlx.name "data-mod"]) ~data_2:(n [@mlx.name "data-2"]) [@JSX]
+  MERLIN
+  let _ =
+    div () ~children:[] ~x_if:(c [@mlx.name "x-if"])
+      ~data_type:("x" [@mlx.name "data-type"])
+      ~data_mod:(m [@mlx.name "data-mod"]) ~data_2:(n [@mlx.name "data-2"]) [@JSX]
+  $ echo 'let _ = <div x-on:click.prevent=g hx-on::load=h ?data-opt=o />' | ./mlx
+  BATCH
+  let _ =
+    div () ~children:[] ~x_on_click_prevent:(g [@mlx.name "x-on:click.prevent"])
+      ~hx_on__load:(h [@mlx.name "hx-on::load"])
+      ?data_opt:(o [@mlx.name "data-opt"]) [@JSX]
+  MERLIN
+  let _ =
+    div () ~children:[] ~x_on_click_prevent:(g [@mlx.name "x-on:click.prevent"])
+      ~hx_on__load:(h [@mlx.name "hx-on::load"])
+      ?data_opt:(o [@mlx.name "data-opt"]) [@JSX]
+  $ echo 'let f a b = a-b = 0 && <div a b-c=a /> = x' | ./mlx
+  BATCH
+  let f a b =
+    a - b = 0 && (div () ~children:[] ~a ~b_c:(a [@mlx.name "b-c"]) [@JSX]) = x
+  MERLIN
+  let f a b =
+    a - b = 0 && (div () ~children:[] ~a ~b_c:(a [@mlx.name "b-c"]) [@JSX]) = x
+
+A name with more segments needs a value:
+
+  $ echo 'let _ = <div data-foo />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 13-21:
+  Error: The prop data-foo has no value.
+  Write data-foo=... instead.
+  
+  MERLIN
+  File "*stdin*", line 1, characters 13-21
+  Error: The prop data-foo has no value. Write data-foo=... instead.
+  
+  $ echo 'let _ = <div ?data-foo />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 14-22:
+  Error: The prop data-foo has no value.
+  Write data-foo=... instead.
+  
+  MERLIN
+  File "*stdin*", line 1, characters 14-22
+  Error: The prop data-foo has no value. Write data-foo=... instead.
+  
+
+The segments of a name must touch:
+
+  $ echo 'let _ = <div data - foo="a" />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 18-19:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 18-19
+  Error: Syntax error
+  
+
+A prop value is still a simple expression, and `--` is still one operator:
+
+  $ echo 'let _ = <div a=b-c />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 16-17:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 19-21
+  Error: Syntax error
+  
+  $ echo 'let _ = <div data--x=1 />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 17-19:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 23-25
+  Error: Syntax error
+  
+
+A symbol operator or an integer with a suffix is not a name segment:
+
+  $ echo 'let _ = <div data:/ =1 />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 18-19:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 18-19
+  Error: Syntax error
+  
+  $ echo 'let _ = <div data-2x=1 />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 18-20:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 18-20
+  Error: Syntax error
+  
+
+A name that ends on a separator is an error:
+
+  $ echo 'let _ = <div data- />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 19-21:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 13-18
+  Error: The prop data-_ has no value. Write data-_=... instead.
+  
