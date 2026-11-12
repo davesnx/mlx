@@ -2883,13 +2883,18 @@ jsx_prop:
   | QUESTION name=jsx_prop_name EQUAL expr=simple_expr { $loc(name), `Prop_opt (name, expr) }
 ;
 jsx_prop_name:
-    segments=reversed_jsx_name_segments
-      { Jsx_helper.jsx_name ~raise:raise_error (List.rev segments) }
+    name=LIDENT { name }
+  | name=LIDENT tail=reversed_jsx_name_tail(jsx_name_sep)
+      { Jsx_helper.jsx_name ~raise:raise_error ((`Word name, $loc(name)) :: List.rev tail) }
 ;
-reversed_jsx_name_segments:
-    name=LIDENT { [ `Word name, $loc(name) ] }
-  | segments=reversed_jsx_name_segments sep=jsx_name_sep part=jsx_name_part
-      { (part, $loc(part)) :: (`Word sep, $loc(sep)) :: segments }
+reversed_jsx_name_tail(sep):
+    sep=sep part=jsx_name_part
+      { [ part, $loc(part); `Word sep, $loc(sep) ] }
+  | tail=reversed_jsx_name_tail(sep) sep=sep part=jsx_name_part
+      { (part, $loc(part)) :: (`Word sep, $loc(sep)) :: tail }
+;
+jsx_tag_sep:
+    COLON { ":" }
 ;
 jsx_name_sep:
     MINUS { "-" }
@@ -4442,6 +4447,9 @@ val_longident:
 jsx_longident(uident, lident):
    | id = uident { `Module, $sloc, Lident id }
    | id = lident { `Value, $sloc, Lident id }
+   | id = lident tail = reversed_jsx_name_tail(jsx_tag_sep) {
+     let name = Jsx_helper.jsx_name ~raise:raise_error ((`Word id, $loc(id)) :: List.rev tail) in
+     `Value, $sloc, Lident name }
    | prefix = uident DOT id = mod_longident {
      let ploc = make_loc $loc(prefix) in
      let rec rebase = function

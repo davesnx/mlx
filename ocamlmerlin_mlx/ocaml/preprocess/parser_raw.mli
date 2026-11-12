@@ -397,7 +397,10 @@ module MenhirInterpreter : sig
     | N_reversed_labeled_tuple_pattern_pattern_no_exn_ : (Asttypes.closed_flag * (string option * Parsetree.pattern) list) nonterminal
     | N_reversed_labeled_tuple_pattern_pattern_ : (Asttypes.closed_flag * (string option * Parsetree.pattern) list) nonterminal
     | N_reversed_labeled_tuple_body : ((string option * Parsetree.expression) list) nonterminal
-    | N_reversed_jsx_name_segments : (([ `Int of string * char option | `Op of string | `Word of string ] *
+    | N_reversed_jsx_name_tail_jsx_tag_sep_ : (([ `Int of string * char option | `Op of string | `Word of string ] *
+   (Lexing.position * Lexing.position))
+  list) nonterminal
+    | N_reversed_jsx_name_tail_jsx_name_sep_ : (([ `Int of string * char option | `Op of string | `Word of string ] *
    (Lexing.position * Lexing.position))
   list) nonterminal
     | N_reversed_bar_llist_extension_constructor_declaration_ : (Parsetree.extension_constructor list) nonterminal
@@ -510,6 +513,7 @@ module MenhirInterpreter : sig
     | N_label_declarations : (Parsetree.label_declaration list) nonterminal
     | N_label_declaration_semi : (Parsetree.label_declaration) nonterminal
     | N_label_declaration : (Parsetree.label_declaration) nonterminal
+    | N_jsx_tag_sep : (string) nonterminal
     | N_jsx_prop_name : (string) nonterminal
     | N_jsx_prop : ((Lexing.position * Lexing.position) *
   [ `Prop of string * Parsetree.expression

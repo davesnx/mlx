@@ -56,6 +56,14 @@ let jsx_name ~raise segments =
 let jsx_label name =
   String.map (function '-' | ':' | '.' -> '_' | c -> c) name
 
+let with_jsx_name ~loc name expr =
+  let loc = make_loc loc in
+  let payload =
+    PStr [ Str.eval ~loc (Exp.constant ~loc (Const.string ~loc name)) ]
+  in
+  let attr = Attr.mk ~loc { txt = "mlx.name"; loc } payload in
+  { expr with pexp_attributes = expr.pexp_attributes @ [ attr ] }
+
 let make_jsx_element ~raise ~loc:_ ~tag ~end_tag ~props ~children
     ~nested_children () =
   let () =
@@ -114,8 +122,12 @@ let make_jsx_element ~raise ~loc:_ ~tag ~end_tag ~props ~children
   in
   let tag =
     match tag with
-    | `Value, loc, txt ->
-        mkexp ~loc (Pexp_ident { loc = make_loc loc; txt })
+    | `Value, loc, txt -> (
+        let ident txt = mkexp ~loc (Pexp_ident { loc = make_loc loc; txt }) in
+        match txt with
+        | Lident name when not (String.equal (jsx_label name) name) ->
+            with_jsx_name ~loc name (ident (Lident (jsx_label name)))
+        | _ -> ident txt)
     | `Module, loc, txt ->
         let lloc = make_loc loc in
         let txt =
@@ -143,13 +155,7 @@ let make_jsx_element ~raise ~loc:_ ~tag ~end_tag ~props ~children
     let valued ~loc name expr =
       let label = jsx_label name in
       if String.equal label name then label, expr
-      else
-        let loc = make_loc loc in
-        let payload =
-          PStr [ Str.eval ~loc (Exp.constant ~loc (Const.string ~loc name)) ]
-        in
-        let attr = Attr.mk ~loc { txt = "mlx.name"; loc } payload in
-        label, { expr with pexp_attributes = expr.pexp_attributes @ [ attr ] }
+      else label, with_jsx_name ~loc name expr
     in
     List.map
       (function

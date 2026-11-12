@@ -1033,3 +1033,73 @@ A name that ends on a separator is an error:
   File "*stdin*", line 1, characters 13-18
   Error: The prop data-_ has no value. Write data-_=... instead.
   
+
+A lowercase tag name can have segments joined by a colon:
+
+  $ echo 'let _ = <x:html />' | ./mlx
+  BATCH
+  let _ = (x_html [@mlx.name "x:html"]) () ~children:[] [@JSX]
+  MERLIN
+  let _ = (x_html [@mlx.name "x:html"]) () ~children:[] [@JSX]
+  $ echo 'let _ = <svg:rect a=1></svg:rect>' | ./mlx
+  BATCH
+  let _ = (svg_rect [@mlx.name "svg:rect"]) () ~children:[] ~a:1 [@JSX]
+  MERLIN
+  let _ = (svg_rect [@mlx.name "svg:rect"]) () ~children:[] ~a:1 [@JSX]
+  $ echo 'let _ = <x:html data-foo="a">"t"</x:html>' | ./mlx
+  BATCH
+  let _ =
+    (x_html [@mlx.name "x:html"]) () ~children:[ "t" ]
+      ~data_foo:("a" [@mlx.name "data-foo"]) [@JSX]
+  MERLIN
+  let _ =
+    (x_html [@mlx.name "x:html"]) () ~children:[ "t" ]
+      ~data_foo:("a" [@mlx.name "data-foo"]) [@JSX]
+
+The closing tag must have the same name:
+
+  $ echo 'let _ = <x:html></x:body>' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 16-25:
+  Error: Syntax error: </x:html> expected
+  File "*stdin*", line 1, characters 8-15:
+    This <x:html> might be unmatched
+  
+  MERLIN
+  File "*stdin*", line 1, characters 16-25
+  Error: Syntax error: </x:html> expected
+    This <x:html> might be unmatched
+  
+
+The segments of a tag name must touch:
+
+  $ echo 'let _ = <x : html />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 11-12:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 11-12
+  Error: Syntax error
+  
+
+A tag name takes no other separator:
+
+  $ echo 'let _ = <my-element />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 11-12:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 20-22
+  Error: Syntax error
+  
+  $ echo 'let _ = <a.b />' | ./mlx
+  BATCH
+  File "*stdin*", line 1, characters 10-11:
+  Error: Syntax error
+  
+  MERLIN
+  File "*stdin*", line 1, characters 13-15
+  Error: Syntax error
+  
