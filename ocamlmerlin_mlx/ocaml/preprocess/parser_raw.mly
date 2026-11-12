@@ -2877,10 +2877,92 @@ jsx_fragment:
     }
 ;
 jsx_prop:
-    name=LIDENT { $loc(name), `Prop_punned name }
-  | QUESTION name=LIDENT { $loc(name), `Prop_opt_punned name }
-  | name=LIDENT EQUAL expr=simple_expr { $loc(name), `Prop (name, expr) }
-  | QUESTION name=LIDENT EQUAL expr=simple_expr { $loc(name), `Prop_opt (name, expr) }
+    name=jsx_prop_name { $loc(name), `Prop_punned name }
+  | QUESTION name=jsx_prop_name { $loc(name), `Prop_opt_punned name }
+  | name=jsx_prop_name EQUAL expr=simple_expr { $loc(name), `Prop (name, expr) }
+  | QUESTION name=jsx_prop_name EQUAL expr=simple_expr { $loc(name), `Prop_opt (name, expr) }
+;
+jsx_prop_name:
+    name=LIDENT { name }
+  | name=LIDENT tail=reversed_jsx_name_tail(jsx_name_sep)
+      { Jsx_helper.jsx_name ~raise:raise_error ((`Word name, $loc(name)) :: List.rev tail) }
+  | prefix=INFIXOP1 part=jsx_name_part
+      { Jsx_helper.jsx_name ~raise:raise_error [ `Prefix prefix, $loc(prefix); part, $loc(part) ] }
+  | prefix=INFIXOP1 part=jsx_name_part tail=reversed_jsx_name_tail(jsx_name_sep)
+      { Jsx_helper.jsx_name ~raise:raise_error
+          ((`Prefix prefix, $loc(prefix)) :: (part, $loc(part)) :: List.rev tail) }
+;
+reversed_jsx_name_tail(sep):
+    sep=sep part=jsx_name_part
+      { [ part, $loc(part); `Word sep, $loc(sep) ] }
+  | tail=reversed_jsx_name_tail(sep) sep=sep part=jsx_name_part
+      { (part, $loc(part)) :: (`Word sep, $loc(sep)) :: tail }
+;
+jsx_tag_sep:
+    COLON { ":" }
+;
+jsx_name_sep:
+    MINUS { "-" }
+  | COLON { ":" }
+  | COLONCOLON { "::" }
+  | DOT { "." }
+;
+jsx_name_part [@recovery `Word "_"] [@symbol "a name segment"]:
+    name=LIDENT { `Word name }
+  | name=UIDENT { `Word name }
+  | int=INT { `Int int }
+  | op=INFIXOP3 { `Op op }
+  | op=INFIXOP4 { `Op op }
+  | AND { `Word "and" }
+  | AS { `Word "as" }
+  | ASSERT { `Word "assert" }
+  | BEGIN { `Word "begin" }
+  | CLASS { `Word "class" }
+  | CONSTRAINT { `Word "constraint" }
+  | DO { `Word "do" }
+  | DONE { `Word "done" }
+  | DOWNTO { `Word "downto" }
+  | EFFECT { `Word "effect" }
+  | ELSE { `Word "else" }
+  | END { `Word "end" }
+  | EXCEPTION { `Word "exception" }
+  | EXTERNAL { `Word "external" }
+  | FALSE { `Word "false" }
+  | FOR { `Word "for" }
+  | FUN { `Word "fun" }
+  | FUNCTION { `Word "function" }
+  | FUNCTOR { `Word "functor" }
+  | IF { `Word "if" }
+  | IN { `Word "in" }
+  | INCLUDE { `Word "include" }
+  | INHERIT { `Word "inherit" }
+  | INITIALIZER { `Word "initializer" }
+  | LAZY { `Word "lazy" }
+  | LET { `Word "let" }
+  | MATCH { `Word "match" }
+  | METHOD { `Word "method" }
+  | MODULE { `Word "module" }
+  | MUTABLE { `Word "mutable" }
+  | NEW { `Word "new" }
+  | NONREC { `Word "nonrec" }
+  | OBJECT { `Word "object" }
+  | OF { `Word "of" }
+  | OPEN { `Word "open" }
+  | OR { `Word "or" }
+  | PRIVATE { `Word "private" }
+  | REC { `Word "rec" }
+  | SIG { `Word "sig" }
+  | STRUCT { `Word "struct" }
+  | THEN { `Word "then" }
+  | TO { `Word "to" }
+  | TRUE { `Word "true" }
+  | TRY { `Word "try" }
+  | TYPE { `Word "type" }
+  | VAL { `Word "val" }
+  | VIRTUAL { `Word "virtual" }
+  | WHEN { `Word "when" }
+  | WHILE { `Word "while" }
+  | WITH { `Word "with" }
 ;
 labeled_simple_expr:
     simple_expr %prec below_HASH
@@ -4370,6 +4452,9 @@ val_longident:
 jsx_longident(uident, lident):
    | id = uident { `Module, $sloc, Lident id }
    | id = lident { `Value, $sloc, Lident id }
+   | id = lident tail = reversed_jsx_name_tail(jsx_tag_sep) {
+     let name = Jsx_helper.jsx_name ~raise:raise_error ((`Word id, $loc(id)) :: List.rev tail) in
+     `Value, $sloc, Lident name }
    | prefix = uident DOT id = mod_longident {
      let ploc = make_loc $loc(prefix) in
      let rec rebase = function

@@ -219,6 +219,8 @@ let print_symbol = function
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_reversed_labeled_tuple_pattern_pattern_no_exn_) -> "reversed_labeled_tuple_pattern_pattern_no_exn_"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_reversed_labeled_tuple_pattern_pattern_) -> "reversed_labeled_tuple_pattern_pattern_"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_reversed_labeled_tuple_body) -> "reversed_labeled_tuple_body"
+  | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_reversed_jsx_name_tail_jsx_tag_sep_) -> "reversed_jsx_name_tail_jsx_tag_sep_"
+  | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_reversed_jsx_name_tail_jsx_name_sep_) -> "reversed_jsx_name_tail_jsx_name_sep_"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_reversed_bar_llist_extension_constructor_declaration_) -> "reversed_bar_llist_extension_constructor_declaration_"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_reversed_bar_llist_extension_constructor_) -> "reversed_bar_llist_extension_constructor_"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_reversed_bar_llist_constructor_declaration_) -> "reversed_bar_llist_constructor_declaration_"
@@ -325,7 +327,11 @@ let print_symbol = function
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_label_declarations) -> "label_declarations"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_label_declaration_semi) -> "label_declaration_semi"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_label_declaration) -> "label_declaration"
+  | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_jsx_tag_sep) -> "jsx_tag_sep"
+  | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_jsx_prop_name) -> "jsx_prop_name"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_jsx_prop) -> "jsx_prop"
+  | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_jsx_name_sep) -> "jsx_name_sep"
+  | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_jsx_name_part) -> "a name segment"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_jsx_longident_JSX_UIDENT_E_JSX_LIDENT_E_) -> "jsx_longident_JSX_UIDENT_E_JSX_LIDENT_E_"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_jsx_longident_JSX_UIDENT_JSX_LIDENT_) -> "jsx_longident_JSX_UIDENT_JSX_LIDENT_"
   | MenhirInterpreter.X (MenhirInterpreter.N MenhirInterpreter.N_jsx_fragment) -> "jsx_fragment"
@@ -591,6 +597,8 @@ let print_value (type a) : a MenhirInterpreter.symbol -> a -> string = function
   | MenhirInterpreter.N MenhirInterpreter.N_reversed_labeled_tuple_pattern_pattern_no_exn_ -> (fun _ -> "reversed_labeled_tuple_pattern_pattern_no_exn_")
   | MenhirInterpreter.N MenhirInterpreter.N_reversed_labeled_tuple_pattern_pattern_ -> (fun _ -> "reversed_labeled_tuple_pattern_pattern_")
   | MenhirInterpreter.N MenhirInterpreter.N_reversed_labeled_tuple_body -> (fun _ -> "reversed_labeled_tuple_body")
+  | MenhirInterpreter.N MenhirInterpreter.N_reversed_jsx_name_tail_jsx_tag_sep_ -> (fun _ -> "reversed_jsx_name_tail_jsx_tag_sep_")
+  | MenhirInterpreter.N MenhirInterpreter.N_reversed_jsx_name_tail_jsx_name_sep_ -> (fun _ -> "reversed_jsx_name_tail_jsx_name_sep_")
   | MenhirInterpreter.N MenhirInterpreter.N_reversed_bar_llist_extension_constructor_declaration_ -> (fun _ -> "reversed_bar_llist_extension_constructor_declaration_")
   | MenhirInterpreter.N MenhirInterpreter.N_reversed_bar_llist_extension_constructor_ -> (fun _ -> "reversed_bar_llist_extension_constructor_")
   | MenhirInterpreter.N MenhirInterpreter.N_reversed_bar_llist_constructor_declaration_ -> (fun _ -> "reversed_bar_llist_constructor_declaration_")
@@ -697,7 +705,11 @@ let print_value (type a) : a MenhirInterpreter.symbol -> a -> string = function
   | MenhirInterpreter.N MenhirInterpreter.N_label_declarations -> (fun _ -> "label_declarations")
   | MenhirInterpreter.N MenhirInterpreter.N_label_declaration_semi -> (fun _ -> "label_declaration_semi")
   | MenhirInterpreter.N MenhirInterpreter.N_label_declaration -> (fun _ -> "label_declaration")
+  | MenhirInterpreter.N MenhirInterpreter.N_jsx_tag_sep -> (fun _ -> "jsx_tag_sep")
+  | MenhirInterpreter.N MenhirInterpreter.N_jsx_prop_name -> (fun _ -> "jsx_prop_name")
   | MenhirInterpreter.N MenhirInterpreter.N_jsx_prop -> (fun _ -> "jsx_prop")
+  | MenhirInterpreter.N MenhirInterpreter.N_jsx_name_sep -> (fun _ -> "jsx_name_sep")
+  | MenhirInterpreter.N MenhirInterpreter.N_jsx_name_part -> (fun _ -> "a name segment")
   | MenhirInterpreter.N MenhirInterpreter.N_jsx_longident_JSX_UIDENT_E_JSX_LIDENT_E_ -> (fun _ -> "jsx_longident_JSX_UIDENT_E_JSX_LIDENT_E_")
   | MenhirInterpreter.N MenhirInterpreter.N_jsx_longident_JSX_UIDENT_JSX_LIDENT_ -> (fun _ -> "jsx_longident_JSX_UIDENT_JSX_LIDENT_")
   | MenhirInterpreter.N MenhirInterpreter.N_jsx_fragment -> (fun _ -> "jsx_fragment")
